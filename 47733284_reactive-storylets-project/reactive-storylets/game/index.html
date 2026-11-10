@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kessler Point</title>
+<style>
+    :root {
+        --bg: #0f131a;
+        --panel: #171e29;
+        --panel-hover: #1f2937;
+        --border: #2b3544;
+        --text: #e8edf3;
+        --muted: #8a96a8;
+        --accent: #d8b05c;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+        font-family: Georgia, 'Times New Roman', serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        padding: 28px 18px 48px;
+    }
+    main { width: 100%; max-width: 620px; }
+
+    header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 6px;
+    }
+    h1 {
+        margin: 0;
+        font-size: 1.05rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent);
+        font-weight: normal;
+    }
+    #progress-label {
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        font-size: 0.78rem;
+        color: var(--muted);
+        letter-spacing: 0.04em;
+    }
+    #progress-bar {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 30px;
+    }
+    #progress-bar span {
+        flex: 1;
+        height: 3px;
+        border-radius: 2px;
+        background: var(--border);
+        transition: background 0.4s;
+    }
+    #progress-bar span.done { background: var(--accent); }
+    #progress-bar span.current { background: #7b6a3f; }
+
+    #scene { min-height: 300px; }
+    #scene p {
+        font-size: 1.12rem;
+        line-height: 1.7;
+        margin: 0 0 1.1em 0;
+        opacity: 0;
+        transform: translateY(6px);
+        animation: rise 0.6s ease forwards;
+    }
+    #scene p.prompt { color: #f4f6f9; }
+    #scene p.the-end {
+        text-align: center;
+        color: var(--accent);
+        font-style: italic;
+        letter-spacing: 0.05em;
+    }
+    @keyframes rise { to { opacity: 1; transform: none; } }
+
+    #choices {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 8px;
+        opacity: 0;
+        animation: rise 0.5s ease forwards;
+    }
+    #choices button {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        font-size: 0.98rem;
+        line-height: 1.4;
+        text-align: left;
+        background: var(--panel);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 13px 16px;
+        cursor: pointer;
+        transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    }
+    #choices button:hover, #choices button:focus-visible {
+        border-color: var(--accent);
+        background: var(--panel-hover);
+        outline: none;
+    }
+    #choices button:active { transform: scale(0.99); }
+    #choices .key {
+        flex: none;
+        width: 22px;
+        height: 22px;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        font-size: 0.75rem;
+        color: var(--muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1px;
+    }
+
+    details#history {
+        margin-top: 40px;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        border-top: 1px solid var(--border);
+        padding-top: 14px;
+    }
+    details#history summary {
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: var(--muted);
+        letter-spacing: 0.03em;
+    }
+    details#history summary:hover { color: var(--text); }
+    #history-list { margin-top: 14px; }
+    .history-scene {
+        margin-bottom: 18px;
+        padding-left: 12px;
+        border-left: 2px solid var(--border);
+    }
+    .history-scene .label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin-bottom: 6px;
+    }
+    .history-scene p {
+        font-family: Georgia, 'Times New Roman', serif;
+        font-size: 0.92rem;
+        line-height: 1.55;
+        color: #b4bdca;
+        margin: 0 0 0.6em 0;
+    }
+    .history-scene .chosen {
+        font-size: 0.85rem;
+        color: var(--accent);
+        margin-top: 4px;
+    }
+
+    /* Researcher-only controls: shown only with ?debug=1 */
+    #debug { display: none; margin-top: 36px; font-family: 'Segoe UI', system-ui, sans-serif;
+             font-size: 0.8rem; color: var(--muted); border-top: 1px dashed var(--border); padding-top: 14px; }
+    body.debug #debug { display: block; }
+    #debug button { background: none; border: 1px solid var(--border); color: var(--muted);
+                    border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 0.8rem; }
+    #selection-log { margin: 10px 0 0 0; padding-left: 18px; }
+    #selection-log li { margin-bottom: 4px; }
+
+    @media (prefers-reduced-motion: reduce) {
+        #scene p, #choices { animation: none; opacity: 1; transform: none; }
+    }
+</style>
+</head>
+<body>
+<main>
+    <header>
+        <h1>Kessler Point</h1>
+        <span id="progress-label" aria-live="polite"></span>
+    </header>
+    <div id="progress-bar" aria-hidden="true"></div>
+
+    <div id="scene" aria-live="polite"></div>
+    <div id="choices"></div>
+
+    <details id="history" hidden>
+        <summary>Story so far</summary>
+        <div id="history-list"></div>
+    </details>
+
+    <div id="debug">
+        <div id="mode-label"></div>
+        <button id="restart-btn">Restart</button>
+        <ul id="selection-log"></ul>
+    </div>
+</main>
+
+<script src="ink.js"></script>
+<script src="story.js"></script>
+<script src="selector.js"></script>
+<script src="player.js"></script>
+</body>
+</html>

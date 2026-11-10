@@ -1,0 +1,25 @@
+{
+  "name": "reactive-storylets",
+  "version": "1.0.0",
+  "description": "A browser-playable storylet-based narrative game comparing reactive (state-matched) vs random storylet selection, built for COMP3180 Final Project.",
+  "main": "game/index.html",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "build": "node game/compile.js",
+    "start": "node game/compile.js && cd game && python3 -m http.server 8000"
+  },
+  "keywords": [
+    "narrative-design",
+    "storylets",
+    "ink",
+    "inkjs",
+    "quality-based-narrative"
+  ],
+  "author": "Stephen Tsai",
+  "license": "ISC",
+  "dependencies": {
+    "inkjs": "^2.4.0"
+  }
+}
